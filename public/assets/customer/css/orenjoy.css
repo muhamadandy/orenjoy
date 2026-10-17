@@ -1,0 +1,801 @@
+/* ==========================================================================
+   Orenjoy: tema oranye hangat di atas template (Bootstrap 5).
+   Dimuat SETELAH bootstrap.min.css dan style.css. Jangan edit file template;
+   semua perubahan tampilan cukup dilakukan di file ini.
+   ========================================================================== */
+
+:root {
+    --oj-primary: #cc4a08;
+    --oj-primary-dark: #a83b05;
+    --oj-accent: #ffb347;
+    --oj-cream: #fff7ed;
+    --oj-ink: #3b2a1e;
+    --oj-muted: #6f5f53;
+    --oj-line: #f0dcc6;
+    --oj-field: #9c8670;
+    --oj-radius: 16px;
+    --oj-header-h: 61px;
+
+    /* Timpa variabel warna template (hijau -> oranye) */
+    --bs-primary: #cc4a08;
+    --bs-secondary: #ffb347;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* ---------- Dasar ---------- */
+body {
+    background: var(--oj-cream);
+    color: var(--oj-ink);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--oj-ink);
+}
+
+body.oj-lock {
+    overflow: hidden;
+}
+
+.oj-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.oj-skip {
+    position: absolute;
+    left: -999px;
+    top: 0;
+}
+.oj-skip:focus {
+    left: 1rem;
+    top: 1rem;
+    z-index: 2000;
+    background: #fff;
+    color: var(--oj-ink);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--oj-ink);
+    outline-offset: 2px;
+}
+.oj-drawer:focus {
+    outline: none;
+}
+
+/* Warna template yang masih dipakai di halaman ini */
+.text-primary {
+    color: var(--oj-primary) !important;
+}
+.bg-primary {
+    background-color: var(--oj-primary) !important;
+}
+.border-primary {
+    border-color: var(--oj-primary) !important;
+}
+
+.btn-primary,
+.btn.btn-primary {
+    background-color: var(--oj-primary) !important;
+    border: 1px solid var(--oj-primary) !important;
+    color: #fff !important;
+    font-weight: 700;
+    border-radius: 999px;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn.btn-primary:hover,
+.btn.btn-primary:focus {
+    background-color: var(--oj-primary-dark) !important;
+    border-color: var(--oj-primary-dark) !important;
+    color: #fff !important;
+}
+.btn-primary:disabled {
+    opacity: 0.65;
+}
+
+/* ---------- Header ---------- */
+.oj-header {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background: #fff;
+    border-bottom: 1px solid var(--oj-line);
+}
+.oj-header .container {
+    min-height: 60px;
+}
+
+.oj-brand {
+    font-family: "Raleway", sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    color: var(--oj-primary);
+    text-decoration: none;
+}
+.oj-brand span {
+    color: var(--oj-ink);
+}
+.oj-brand:hover {
+    color: var(--oj-primary-dark);
+}
+
+.oj-table-pill {
+    background: var(--oj-cream);
+    border: 1px solid var(--oj-line);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.oj-cart-btn {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--oj-line);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--oj-primary);
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+.oj-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--oj-primary);
+    color: #fff;
+    font-family: "Open Sans", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: center;
+}
+
+/* ---------- Hero ---------- */
+.oj-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2rem 0 2.5rem;
+    background: linear-gradient(135deg, #b84207 0%, #cc4a08 55%, #e56a10 100%);
+    color: #fff;
+}
+.oj-hero::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    bottom: -90px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: var(--oj-accent);
+    opacity: 0.35;
+    pointer-events: none;
+}
+.oj-hero .container {
+    position: relative;
+    z-index: 1;
+}
+.oj-hero h1 {
+    color: #fff;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    margin-bottom: 0.5rem;
+}
+.oj-hero-sub {
+    max-width: 34rem;
+    margin: 0;
+    color: #fff;
+}
+.oj-eyebrow {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+/* ---------- Toolbar: cari + kategori ---------- */
+.oj-toolbar {
+    position: sticky;
+    top: var(--oj-header-h);
+    z-index: 1010;
+    padding: 0.75rem 0 0.5rem;
+    background: var(--oj-cream);
+    border-bottom: 1px solid var(--oj-line);
+}
+.oj-search {
+    position: relative;
+}
+.oj-search input {
+    width: 100%;
+    height: 46px;
+    padding: 0 1rem 0 2.75rem;
+    border: 1px solid var(--oj-field);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--oj-ink);
+    font-size: 1rem;
+}
+.oj-search i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--oj-muted);
+    pointer-events: none;
+}
+
+.oj-chips {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 0 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.oj-chips::-webkit-scrollbar {
+    display: none;
+}
+.oj-chip {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0.5rem 1.1rem;
+    border: 1px solid var(--oj-line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--oj-ink);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.oj-chip[aria-pressed="true"] {
+    background: var(--oj-primary);
+    border-color: var(--oj-primary);
+    color: #fff;
+}
+@media (min-width: 768px) {
+    .oj-chips {
+        flex-wrap: wrap;
+        overflow: visible;
+    }
+}
+
+/* ---------- Daftar menu ---------- */
+.oj-main {
+    padding-bottom: 6.5rem;
+}
+
+.oj-section {
+    padding-top: 1.5rem;
+}
+.oj-section h2 {
+    font-size: 1.35rem;
+    margin-bottom: 1rem;
+}
+
+.oj-empty-msg {
+    margin: 1.5rem 0 0;
+    color: var(--oj-muted);
+    text-align: center;
+}
+.oj-empty-msg:empty {
+    display: none;
+}
+
+.oj-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--oj-line);
+    border-radius: var(--oj-radius);
+    box-shadow: 0 1px 2px rgba(59, 42, 30, 0.05);
+}
+.oj-card-img {
+    aspect-ratio: 4 / 3;
+    background: #fde8d0;
+    overflow: hidden;
+}
+.oj-card-img img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.oj-card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0.875rem;
+}
+.oj-card-title {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    line-height: 1.3;
+}
+.oj-card-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0 0 0.75rem;
+    color: var(--oj-muted);
+    font-size: 0.875rem;
+}
+.oj-card-foot {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.oj-price {
+    color: var(--oj-primary);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+.oj-add {
+    min-height: 44px;
+    padding: 0.45rem 1.1rem;
+}
+
+.oj-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--oj-line);
+    border-radius: 999px;
+    background: #fff;
+}
+.oj-stepper button {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--oj-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+.oj-stepper button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.oj-stepper span {
+    min-width: 28px;
+    text-align: center;
+    font-weight: 700;
+}
+
+/* ---------- Bar keranjang melayang ---------- */
+.oj-cartbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1030;
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    pointer-events: none;
+}
+.oj-cartbar-btn {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 720px;
+    min-height: 52px;
+    margin: 0 auto;
+    padding: 0.9rem 1.25rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--oj-primary);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(168, 59, 5, 0.35);
+    cursor: pointer;
+}
+.oj-cartbar-btn:hover {
+    background: var(--oj-primary-dark);
+}
+
+/* ---------- Drawer keranjang ---------- */
+.oj-backdrop {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1040;
+    background: rgba(59, 42, 30, 0.55);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.25s ease,
+        visibility 0s linear 0.25s;
+}
+.oj-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease;
+}
+
+.oj-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 440px);
+    height: 100vh;
+    height: 100dvh;
+    background: #fff;
+    box-shadow: -12px 0 32px rgba(59, 42, 30, 0.2);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition:
+        transform 0.25s ease,
+        visibility 0s linear 0.25s;
+}
+.oj-drawer.open {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.25s ease;
+}
+
+.oj-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--oj-line);
+}
+.oj-drawer-head h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+.oj-close {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--oj-ink);
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.oj-drawer-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+}
+.oj-drawer-body {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    overflow-y: auto;
+}
+.oj-drawer-foot {
+    padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--oj-line);
+    background: #fff;
+}
+
+.oj-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    color: var(--oj-muted);
+}
+.oj-empty i {
+    font-size: 2.5rem;
+    color: var(--oj-primary);
+}
+
+/* Baris pesanan (keranjang dan halaman konfirmasi) */
+.oj-lines {
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+}
+.oj-line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--oj-line);
+}
+.oj-line-img {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: #fde8d0;
+    object-fit: cover;
+}
+.oj-line-info {
+    flex: 1;
+    min-width: 0;
+}
+.oj-line-name {
+    font-weight: 700;
+    line-height: 1.25;
+}
+.oj-line-price {
+    color: var(--oj-muted);
+    font-size: 0.875rem;
+}
+
+/* Form */
+.oj-field {
+    margin: 0 0 1rem;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+.oj-field label,
+.oj-field legend {
+    display: block;
+    float: none;
+    width: auto;
+    margin: 0 0 0.25rem;
+    padding: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--oj-ink);
+}
+.oj-opt {
+    font-weight: 400;
+    color: var(--oj-muted);
+}
+.oj-field input[type="text"],
+.oj-field input[type="number"],
+.oj-field textarea {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--oj-field);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--oj-ink);
+    font-size: 1rem;
+}
+
+.oj-pay {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+.oj-pay label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--oj-field);
+    border-radius: 12px;
+    background: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+.oj-pay label:has(input:checked) {
+    border-color: var(--oj-primary);
+    background: var(--oj-cream);
+    box-shadow: 0 0 0 1px var(--oj-primary);
+}
+.oj-pay input {
+    margin-top: 0.25rem;
+    accent-color: var(--oj-primary);
+}
+.oj-pay small {
+    display: block;
+    font-weight: 400;
+    color: var(--oj-muted);
+}
+
+.oj-alert {
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e8a39b;
+    border-radius: 12px;
+    background: #fdecea;
+    color: #7a1f14;
+    font-size: 0.9rem;
+}
+
+/* Ringkasan harga */
+.oj-sums {
+    margin: 0 0 0.75rem;
+}
+.oj-sum {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.15rem 0;
+}
+.oj-sum dt {
+    font-weight: 400;
+}
+.oj-sum dd {
+    margin: 0;
+}
+.oj-sum.total {
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--oj-line);
+    font-size: 1.15rem;
+}
+.oj-sum.total dt,
+.oj-sum.total dd {
+    font-weight: 800;
+}
+
+.oj-submit {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    padding: 0.85rem 1.5rem;
+    font-size: 1.05rem;
+}
+a.oj-submit {
+    width: auto;
+    display: inline-block;
+}
+
+/* ---------- Halaman konfirmasi ---------- */
+.oj-muted {
+    color: var(--oj-muted);
+}
+
+.oj-success {
+    padding: 1.5rem 1rem;
+    text-align: center;
+}
+.oj-success h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.25rem;
+}
+.oj-success-icon {
+    width: 64px;
+    height: 64px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    border-radius: 50%;
+    background: var(--oj-primary);
+    color: #fff;
+    font-size: 1.75rem;
+}
+.oj-code {
+    margin: 0 0 0.5rem;
+    color: var(--oj-primary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: clamp(1.4rem, 6vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    word-break: break-all;
+}
+
+.oj-status {
+    display: inline-block;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+.oj-status.is-pending {
+    background: #fff0cc;
+    color: #6b4600;
+}
+.oj-status.is-progress {
+    background: #dbeafe;
+    color: #1e3a8a;
+}
+.oj-status.is-ready {
+    background: #d9f2e1;
+    color: #14532d;
+}
+.oj-status.is-done {
+    background: #e8e4df;
+    color: #3b2a1e;
+}
+.oj-status.is-cancelled {
+    background: #fdecea;
+    color: #7a1f14;
+}
+
+.oj-panel {
+    padding: 1.25rem;
+    border: 1px solid var(--oj-line);
+    border-radius: var(--oj-radius);
+    background: #fff;
+}
+.oj-panel-title {
+    margin: 1rem 0 0;
+    font-size: 1.1rem;
+}
+.oj-meta {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+}
+.oj-meta > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.oj-meta dt {
+    font-weight: 400;
+    color: var(--oj-muted);
+}
+.oj-meta dd {
+    margin: 0;
+    font-weight: 700;
+    text-align: right;
+}
+.oj-note {
+    margin: 0 0 1rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 12px;
+    background: var(--oj-cream);
+}
+
+/* ---------- Footer ---------- */
+.oj-footer {
+    padding: 1.5rem 0 7rem;
+    color: var(--oj-muted);
+    text-align: center;
+}
+.oj-footer a {
+    color: var(--oj-primary);
+}
+
+/* ---------- Kurangi gerakan ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .oj-drawer,
+    .oj-backdrop {
+        transition: none;
+    }
+}
