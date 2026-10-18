@@ -16,14 +16,19 @@
     <script src="{{ asset('assets/admin/static/js/initTheme.js') }}"></script>
 
     @php
-        // Item muncul otomatis begitu route-nya dibuat di tahap berikutnya.
+        $role = auth()->user()?->role?->role_name;
+
+        // Beranda tiap role: admin ke dashboard, kasir dan koki langsung ke daftar pesanan.
+        $homeRoute = $role === 'admin' ? 'admin.dashboard' : 'admin.orders.index';
+
+        // 'roles' = siapa yang melihat menu ini. Item muncul otomatis begitu route-nya ada.
         $menuItems = [
-            ['route' => 'admin.dashboard',        'match' => 'admin.dashboard',    'icon' => 'bi-grid-fill',  'label' => 'Dashboard'],
-            ['route' => 'admin.categories.index', 'match' => 'admin.categories.*', 'icon' => 'bi-tags-fill',  'label' => 'Kategori'],
-            ['route' => 'admin.items.index',      'match' => 'admin.items.*',      'icon' => 'bi-card-list',  'label' => 'Daftar Menu'],
-            ['route' => 'admin.tables.index',     'match' => 'admin.tables.*',     'icon' => 'bi-qr-code',    'label' => 'Meja & QR'],
-            ['route' => 'admin.orders.index',     'match' => 'admin.orders.*',     'icon' => 'bi-cart-fill',  'label' => 'Kelola Pesanan'],
-            ['route' => 'admin.users.index',      'match' => 'admin.users.*',      'icon' => 'bi-person-fill', 'label' => 'Manajemen Karyawan'],
+            ['route' => 'admin.dashboard',        'match' => 'admin.dashboard',    'icon' => 'bi-grid-fill',   'label' => 'Dashboard',          'roles' => ['admin']],
+            ['route' => 'admin.categories.index', 'match' => 'admin.categories.*', 'icon' => 'bi-tags-fill',   'label' => 'Kategori',           'roles' => ['admin']],
+            ['route' => 'admin.items.index',      'match' => 'admin.items.*',      'icon' => 'bi-card-list',   'label' => 'Daftar Menu',        'roles' => ['admin']],
+            ['route' => 'admin.tables.index',     'match' => 'admin.tables.*',     'icon' => 'bi-qr-code',     'label' => 'Meja & QR',          'roles' => ['admin']],
+            ['route' => 'admin.orders.index',     'match' => 'admin.orders.*',     'icon' => 'bi-cart-fill',   'label' => $role === 'chef' ? 'Antrean Dapur' : 'Kelola Pesanan', 'roles' => ['admin', 'cashier', 'chef']],
+            ['route' => 'admin.users.index',      'match' => 'admin.users.*',      'icon' => 'bi-person-fill', 'label' => 'Manajemen Karyawan', 'roles' => ['admin']],
         ];
     @endphp
 
@@ -33,7 +38,7 @@
                 <div class="sidebar-header position-relative">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="logo">
-                            <a href="{{ route('admin.dashboard') }}" class="fs-3 fw-bold text-decoration-none">Orenjoy</a>
+                            <a href="{{ route($homeRoute) }}" class="fs-3 fw-bold text-decoration-none">Orenjoy</a>
                         </div>
                         <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true"
@@ -74,7 +79,7 @@
                         <li class="sidebar-title">Menu</li>
 
                         @foreach ($menuItems as $item)
-                            @if (Route::has($item['route']))
+                            @if (in_array($role, $item['roles'], true) && Route::has($item['route']))
                                 <li class="sidebar-item {{ request()->routeIs($item['match']) ? 'active' : '' }}">
                                     <a href="{{ route($item['route']) }}" class="sidebar-link">
                                         <i class="bi {{ $item['icon'] }}"></i>

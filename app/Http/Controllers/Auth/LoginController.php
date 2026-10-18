@@ -17,8 +17,8 @@ class LoginController extends Controller
      */
     private const PANEL_HOME = [
         'admin' => 'admin.dashboard',
-        // 'cashier' => 'admin.orders.index',
-        // 'chef' => 'admin.kitchen.index',
+        'cashier' => 'admin.orders.index',
+        'chef' => 'admin.orders.index',
     ];
 
     public function create(): View|RedirectResponse

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\DiningTable;
 use App\Models\Item;
 use App\Models\Order;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +25,6 @@ class OrderController extends Controller
     {
         $data = $request->validate([
             'customer_name' => ['required', 'string', 'max:60'],
-            'table_number' => ['required', 'integer', 'between:1,999'],
             'payment_method' => ['required', Rule::in(['tunai', 'qris'])],
             'note' => ['nullable', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1', 'max:50'],
@@ -33,9 +33,6 @@ class OrderController extends Controller
         ], [
             'customer_name.required' => 'Nama wajib diisi.',
             'customer_name.max' => 'Nama maksimal 60 karakter.',
-            'table_number.required' => 'Nomor meja wajib diisi.',
-            'table_number.integer' => 'Nomor meja harus berupa angka.',
-            'table_number.between' => 'Nomor meja harus antara 1 dan 999.',
             'payment_method.required' => 'Pilih metode pembayaran.',
             'payment_method.in' => 'Metode pembayaran tidak valid.',
             'note.max' => 'Catatan maksimal 255 karakter.',
@@ -49,6 +46,20 @@ class OrderController extends Controller
             'items.*.qty.integer' => 'Jumlah menu tidak valid.',
             'items.*.qty.between' => 'Jumlah tiap menu harus antara 1 dan 50.',
         ]);
+
+        // Meja ditentukan server dari QR yang di-scan (tersimpan di session), bukan dari input pelanggan.
+        // Dicek ulang di sini: meja yang sudah dihapus atau dinonaktifkan admin tidak bisa dipakai memesan.
+        $table = session()->has('table_id')
+            ? DiningTable::where('id', session('table_id'))->where('is_active', true)->first()
+            : null;
+
+        if (! $table) {
+            session()->forget(['table_id', 'table_number']);
+
+            throw ValidationException::withMessages([
+                'table_number' => 'Meja belum dikenali. Scan QR code di meja Anda, lalu pesan lagi.',
+            ]);
+        }
 
         $ids = collect($data['items'])->pluck('id');
 
@@ -89,7 +100,7 @@ class OrderController extends Controller
             $taxTotal += $lineTax;
         }
 
-        $order = DB::transaction(function () use ($data, $lines, $subTotal, $taxTotal) {
+        $order = DB::transaction(function () use ($data, $table, $lines, $subTotal, $taxTotal) {
             $order = Order::create([
                 'order_code' => $this->generateOrderCode(),
                 'customer_name' => $data['customer_name'],
@@ -97,7 +108,7 @@ class OrderController extends Controller
                 'tax' => $taxTotal,
                 'grand_total' => $subTotal + $taxTotal,
                 'status' => 'pending',
-                'table_number' => $data['table_number'],
+                'table_number' => $table->number,
                 'payment_method' => $data['payment_method'],
                 'note' => $data['note'] ?? null,
             ]);
@@ -106,8 +117,6 @@ class OrderController extends Controller
 
             return $order;
         });
-
-        session(['table_number' => (int) $data['table_number']]);
 
         // Path relatif supaya tetap benar walau diakses lewat IP LAN atau domain lain.
         return response()->json([

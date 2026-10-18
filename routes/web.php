@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\MenuController;
 use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Staff\OrderController as StaffOrderController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,15 @@ Route::get('/pesanan/{code}', [OrderController::class, 'show'])->name('order.sho
 Route::get('/admin/login', [LoginController::class, 'create'])->name('login');
 Route::post('/admin/login', [LoginController::class, 'store'])->middleware('throttle:10,1');
 Route::post('/admin/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+
+// Pesanan: admin, kasir, dan koki (hak ubah status diatur di App\Support\OrderFlow)
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', EnsureRole::class.':admin,cashier,chef'])
+    ->group(function () {
+        Route::get('orders', [StaffOrderController::class, 'index'])->name('orders.index');
+        Route::patch('orders/{order}/status', [StaffOrderController::class, 'updateStatus'])->name('orders.status');
+    });
 
 // Panel admin (hanya role admin)
 Route::prefix('admin')

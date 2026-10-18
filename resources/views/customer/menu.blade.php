@@ -142,12 +142,17 @@
                            autocomplete="name" placeholder="Untuk memanggil pesananmu">
                 </div>
 
-                <div class="oj-field">
-                    <label for="tableNumber">Nomor meja</label>
-                    <input id="tableNumber" name="table_number" type="number" inputmode="numeric"
-                           min="1" max="999" step="1" required placeholder="Contoh: 5"
-                           value="{{ session('table_number') }}">
-                </div>
+                @if (session('table_number'))
+                    <div class="oj-field">
+                        <label>Nomor meja</label>
+                        <p class="mb-0"><strong>Meja {{ session('table_number') }}</strong></p>
+                        <small class="oj-muted">Ditentukan dari QR code di meja Anda.</small>
+                    </div>
+                @else
+                    <div class="oj-alert" role="alert">
+                        Scan QR code di meja Anda terlebih dahulu untuk bisa mengirim pesanan.
+                    </div>
+                @endif
 
                 <fieldset class="oj-field">
                     <legend>Pembayaran</legend>
@@ -177,7 +182,8 @@
                     <div class="oj-sum total"><dt>Total</dt><dd class="js-total">Rp 0</dd></div>
                 </dl>
 
-                <button type="submit" class="btn btn-primary oj-submit" id="submitBtn">
+                <button type="submit" class="btn btn-primary oj-submit" id="submitBtn"
+                        @disabled(! session('table_number'))>
                     <span class="js-submit-label">Kirim Pesanan</span>
                 </button>
             </div>

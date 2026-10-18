@@ -388,7 +388,6 @@
         const f = els.form.elements;
         const payload = {
             customer_name: f.customer_name.value.trim(),
-            table_number: Number(f.table_number.value),
             payment_method: f.payment_method.value,
             note: f.note.value.trim(),
             items: cart.map(({ id, qty }) => ({ id, qty })),

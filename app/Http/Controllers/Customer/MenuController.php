@@ -15,6 +15,17 @@ class MenuController extends Controller
      */
     public function index(): View
     {
+        // Meja di session bisa sudah dihapus atau dinonaktifkan admin: kalau begitu, lupakan.
+        if (session()->has('table_id')) {
+            $stillValid = DiningTable::where('id', session('table_id'))
+                ->where('is_active', true)
+                ->exists();
+
+            if (! $stillValid) {
+                session()->forget(['table_id', 'table_number']);
+            }
+        }
+
         $categories = Category::query()
             ->with(['items' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
             ->orderBy('id')
@@ -27,7 +38,7 @@ class MenuController extends Controller
 
     /**
      * Tujuan QR code di meja, contoh: https://domain-kamu.com/meja/k3x9...
-     * Token acak dicocokkan ke tabel meja, nomornya disimpan di session,
+     * Token acak dicocokkan ke tabel meja, meja disimpan di session,
      * lalu pelanggan diarahkan ke menu. Token tidak dikenal / meja nonaktif = 404.
      */
     public function table(string $token): RedirectResponse
@@ -36,7 +47,10 @@ class MenuController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        session(['table_number' => $table->number]);
+        session([
+            'table_id' => $table->id,
+            'table_number' => $table->number,
+        ]);
 
         return redirect()->route('menu');
     }
