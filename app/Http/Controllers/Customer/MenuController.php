@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\DiningTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -25,14 +26,17 @@ class MenuController extends Controller
     }
 
     /**
-     * Tujuan QR code di meja, contoh: https://domain-kamu.com/meja/5
-     * Nomor meja disimpan di session lalu pelanggan diarahkan ke menu.
+     * Tujuan QR code di meja, contoh: https://domain-kamu.com/meja/k3x9...
+     * Token acak dicocokkan ke tabel meja, nomornya disimpan di session,
+     * lalu pelanggan diarahkan ke menu. Token tidak dikenal / meja nonaktif = 404.
      */
-    public function table(int $number): RedirectResponse
+    public function table(string $token): RedirectResponse
     {
-        abort_unless($number >= 1 && $number <= 999, 404);
+        $table = DiningTable::where('token', $token)
+            ->where('is_active', true)
+            ->firstOrFail();
 
-        session(['table_number' => $number]);
+        session(['table_number' => $table->number]);
 
         return redirect()->route('menu');
     }

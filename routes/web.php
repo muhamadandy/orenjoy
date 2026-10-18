@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DiningTableController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\MenuController;
@@ -13,7 +14,7 @@ Route::redirect('/', '/menu');
 
 // Customer (publik, tanpa login)
 Route::get('/menu', [MenuController::class, 'index'])->name('menu');
-Route::get('/meja/{number}', [MenuController::class, 'table'])->whereNumber('number')->name('table');
+Route::get('/meja/{token}', [MenuController::class, 'table'])->where('token', '[a-z0-9]{24}')->name('table');
 
 // Batas 30 permintaan per menit per IP (WiFi restoran biasanya satu IP untuk semua pelanggan).
 Route::post('/checkout', [OrderController::class, 'store'])->middleware('throttle:30,1')->name('checkout');
@@ -35,4 +36,9 @@ Route::prefix('admin')
 
         Route::patch('items/{item}/toggle', [ItemController::class, 'toggle'])->name('items.toggle');
         Route::resource('items', ItemController::class)->except('show');
+
+        Route::get('tables/print', [DiningTableController::class, 'print'])->name('tables.print');
+        Route::patch('tables/{table}/toggle', [DiningTableController::class, 'toggle'])->name('tables.toggle');
+        Route::post('tables/{table}/regenerate', [DiningTableController::class, 'regenerate'])->name('tables.regenerate');
+        Route::resource('tables', DiningTableController::class)->only(['index', 'store', 'destroy']);
     });

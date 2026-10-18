@@ -12,17 +12,6 @@
 @section('content')
     @php
         $placeholder = asset('assets/customer/img/placeholder.svg');
-
-        // Kolom `img` bisa berisi URL penuh atau path di storage/app/public.
-        $imageUrl = function (?string $img) use ($placeholder): string {
-            if (! $img) {
-                return $placeholder;
-            }
-
-            return Str::startsWith($img, ['http://', 'https://'])
-                ? $img
-                : asset('storage/'.ltrim($img, '/'));
-        };
     @endphp
 
     <section class="oj-hero">
@@ -74,10 +63,10 @@
                                      data-item-id="{{ $item->id }}"
                                      data-title="{{ $item->name }}"
                                      data-price="{{ $item->price }}"
-                                     data-img="{{ $imageUrl($item->img) }}"
+                                     data-img="{{ $item->image_url }}"
                                      data-search="{{ Str::lower($item->name.' '.$item->description) }}">
                                 <div class="oj-card-img">
-                                    <img src="{{ $imageUrl($item->img) }}"
+                                    <img src="{{ $item->image_url }}"
                                          alt="{{ $item->name }}"
                                          loading="lazy"
                                          onerror="this.onerror=null;this.src='{{ $placeholder }}'">
