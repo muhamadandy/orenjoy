@@ -2,23 +2,19 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
+        // Template admin (Mazer) memakai Bootstrap 5, jadi nomor halaman harus ikut Bootstrap.
+        Paginator::useBootstrapFive();
     }
 }

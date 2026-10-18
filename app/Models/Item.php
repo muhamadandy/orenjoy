@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -46,6 +47,23 @@ class Item extends Model
             'price' => 'integer',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * URL foto menu. Kolom `img` bisa berisi URL penuh atau path di storage/app/public.
+     * Jika kosong, dipakai gambar placeholder.
+     */
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::get(function (): string {
+            if (! $this->img) {
+                return asset('assets/customer/img/placeholder.svg');
+            }
+
+            return Str::startsWith($this->img, ['http://', 'https://'])
+                ? $this->img
+                : asset('storage/'.ltrim($this->img, '/'));
+        });
     }
 
     public function category()

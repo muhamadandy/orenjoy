@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\MenuController;
 use App\Http\Controllers\Customer\OrderController;
@@ -28,4 +30,9 @@ Route::prefix('admin')
     ->middleware(['auth', EnsureRole::class.':admin'])
     ->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
+
+        Route::resource('categories', CategoryController::class)->except('show');
+
+        Route::patch('items/{item}/toggle', [ItemController::class, 'toggle'])->name('items.toggle');
+        Route::resource('items', ItemController::class)->except('show');
     });
