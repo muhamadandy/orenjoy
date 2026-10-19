@@ -4,11 +4,10 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\DiningTable;
-use App\Models\Item;
 use App\Models\Order;
+use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -21,7 +20,7 @@ class OrderController extends Controller
      * Browser hanya mengirim id menu dan jumlahnya. Nama dan harga selalu
      * diambil ulang dari database, jadi harga tidak bisa dimanipulasi dari HP.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, OrderService $orders): JsonResponse
     {
         $data = $request->validate([
             'customer_name' => ['required', 'string', 'max:60'],
@@ -47,76 +46,35 @@ class OrderController extends Controller
             'items.*.qty.between' => 'Jumlah tiap menu harus antara 1 dan 50.',
         ]);
 
-        // Meja ditentukan server dari QR yang di-scan (tersimpan di session), bukan dari input pelanggan.
-        // Dicek ulang di sini: meja yang sudah dihapus atau dinonaktifkan admin tidak bisa dipakai memesan.
-        $table = session()->has('table_id')
-            ? DiningTable::where('id', session('table_id'))->where('is_active', true)->first()
-            : null;
+        // Meja ditentukan server dari QR yang di-scan HP ini, bukan dari input pelanggan.
+        // Gagal kalau belum scan, masa berlakunya habis, atau mejanya sudah dihapus/dinonaktifkan.
+        $table = DiningTable::fromSession();
 
         if (! $table) {
-            session()->forget(['table_id', 'table_number']);
-
             throw ValidationException::withMessages([
-                'table_number' => 'Meja belum dikenali. Scan QR code di meja Anda, lalu pesan lagi.',
+                'table_number' => 'Meja belum dikenali atau sesi scan sudah berakhir. Scan QR code di meja Anda lagi, lalu pesan.',
             ]);
         }
 
-        $ids = collect($data['items'])->pluck('id');
+        $order = $orders->create($data['items'], [
+            'customer_name' => $data['customer_name'],
+            'table_number' => $table->number,
+            'payment_method' => $data['payment_method'],
+            'note' => $data['note'] ?? null,
+            'status' => 'pending',
+            'user_id' => null,
+        ]);
 
-        // Menu yang nonaktif atau sudah dihapus (soft delete) tidak ikut terambil.
-        $menu = Item::query()
-            ->where('is_active', true)
-            ->whereIn('id', $ids)
-            ->get()
-            ->keyBy('id');
 
-        if ($menu->count() !== $ids->count()) {
-            throw ValidationException::withMessages([
-                'items' => 'Ada menu di keranjang yang sudah tidak tersedia. Muat ulang halaman lalu pilih kembali.',
-            ]);
-        }
-
-        $taxPercent = (int) config('orenjoy.tax_percent', 10);
-        $subTotal = 0;
-        $taxTotal = 0;
-        $lines = [];
-
-        foreach ($data['items'] as $row) {
-            $item = $menu[$row['id']];
-            $qty = (int) $row['qty'];
-
-            $lineSub = $item->price * $qty;
-            $lineTax = (int) round($lineSub * $taxPercent / 100);
-
-            $lines[] = [
-                'item_id' => $item->id,
-                'quantity' => $qty,
-                'price' => $item->price,          // harga satuan saat dipesan
-                'tax' => $lineTax,                // pajak untuk baris ini
-                'total_price' => $lineSub + $lineTax,
-            ];
-
-            $subTotal += $lineSub;
-            $taxTotal += $lineTax;
-        }
-
-        $order = DB::transaction(function () use ($data, $table, $lines, $subTotal, $taxTotal) {
-            $order = Order::create([
-                'order_code' => $this->generateOrderCode(),
-                'customer_name' => $data['customer_name'],
-                'sub_total' => $subTotal,
-                'tax' => $taxTotal,
-                'grand_total' => $subTotal + $taxTotal,
-                'status' => 'pending',
-                'table_number' => $table->number,
-                'payment_method' => $data['payment_method'],
-                'note' => $data['note'] ?? null,
-            ]);
-
-            $order->orderItems()->createMany($lines);
-
-            return $order;
-        });
+        // Ingat kode pesanan di session HP ini supaya muncul di "Pesanan saya" (maksimal 10 terakhir).
+        session([
+            'order_codes' => collect(session('order_codes', []))
+                ->push($order->order_code)
+                ->unique()
+                ->take(-10)
+                ->values()
+                ->all(),
+        ]);
 
         // Path relatif supaya tetap benar walau diakses lewat IP LAN atau domain lain.
         return response()->json([
@@ -134,26 +92,5 @@ class OrderController extends Controller
             ->firstOrFail();
 
         return view('customer.order-success', compact('order'));
-    }
-
-    /**
-     * Kode pesanan mudah dibaca kasir, contoh: ORJ-261017-K7M2QX.
-     * Huruf dan angka yang mirip (O/0, I/1, L) sengaja dibuang.
-     */
-    private function generateOrderCode(): string
-    {
-        $alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-        $max = strlen($alphabet) - 1;
-
-        do {
-            $suffix = '';
-            for ($i = 0; $i < 6; $i++) {
-                $suffix .= $alphabet[random_int(0, $max)];
-            }
-
-            $code = 'ORJ-'.now()->format('ymd').'-'.$suffix;
-        } while (Order::withTrashed()->where('order_code', $code)->exists());
-
-        return $code;
     }
 }

@@ -35,6 +35,15 @@ Route::prefix('admin')
         Route::patch('orders/{order}/status', [StaffOrderController::class, 'updateStatus'])->name('orders.status');
     });
 
+// Input pesanan oleh kasir (admin dan kasir saja, koki tidak)
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', EnsureRole::class.':admin,cashier'])
+    ->group(function () {
+        Route::get('orders/create', [StaffOrderController::class, 'create'])->name('orders.create');
+        Route::post('orders', [StaffOrderController::class, 'store'])->name('orders.store');
+    });
+
 // Panel admin (hanya role admin)
 Route::prefix('admin')
     ->name('admin.')

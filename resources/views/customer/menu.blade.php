@@ -28,6 +28,37 @@
         </div>
     </section>
 
+    @if ($myOrders->isNotEmpty())
+        @php
+            $orderStatusClass = ['pending' => 'is-pending', 'settlement' => 'is-progress', 'cooked' => 'is-ready'];
+        @endphp
+
+        <div class="container pt-3">
+            <section class="oj-panel" aria-labelledby="myOrdersTitle">
+                <h2 class="oj-panel-title" id="myOrdersTitle">Pesanan saya</h2>
+
+                <ul class="list-unstyled mb-0">
+                    @foreach ($myOrders as $myOrder)
+                        <li class="d-flex justify-content-between align-items-center gap-2 py-2">
+                            <div>
+                                <a href="{{ route('order.show', ['code' => $myOrder->order_code], false) }}">
+                                    <strong>{{ $myOrder->order_code }}</strong>
+                                </a>
+                                <div class="oj-muted small">
+                                    {{ $myOrder->table_number ? 'Meja '.$myOrder->table_number : 'Bawa pulang' }}
+                                    &middot; Rp {{ number_format($myOrder->grand_total, 0, ',', '.') }}
+                                </div>
+                            </div>
+                            <span class="oj-status {{ $orderStatusClass[$myOrder->status] ?? 'is-pending' }}">
+                                {{ \App\Support\OrderFlow::label($myOrder->status) }}
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        </div>
+    @endif
+
     <div class="oj-toolbar">
         <div class="container">
             <div class="oj-search">

@@ -49,4 +49,38 @@ class DiningTable extends Model
     {
         return route('table', $this->token);
     }
+
+    /** Catat di session HP pelanggan bahwa ia baru saja scan QR meja ini. */
+    public static function rememberInSession(self $table): void
+    {
+        session([
+            'table_id' => $table->id,
+            'table_number' => $table->number,
+            'table_scanned_at' => time(),
+        ]);
+    }
+
+    /**
+     * Meja milik HP ini, atau null kalau belum scan, masa berlakunya habis,
+     * atau mejanya sudah dihapus / dinonaktifkan admin.
+     * Data session yang sudah tidak berlaku dibersihkan di sini.
+     */
+    public static function fromSession(): ?self
+    {
+        $id = session('table_id');
+        $scannedAt = (int) session('table_scanned_at', 0);
+        $maxAge = max(1, (int) config('orenjoy.table_session_hours', 3)) * 3600;
+
+        $table = null;
+
+        if ($id && $scannedAt > 0 && (time() - $scannedAt) < $maxAge) {
+            $table = static::where('id', $id)->where('is_active', true)->first();
+        }
+
+        if (! $table) {
+            session()->forget(['table_id', 'table_number', 'table_scanned_at']);
+        }
+
+        return $table;
+    }
 }

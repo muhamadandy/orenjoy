@@ -24,7 +24,7 @@
                 <div class="oj-success">
                     <div class="oj-success-icon" aria-hidden="true"><i class="fas fa-check"></i></div>
                     <h1>Pesanan terkirim!</h1>
-                    <p class="oj-muted mb-3">Tunjukkan kode ini ke kasir.</p>
+                    <p class="oj-muted mb-3">Tunjukkan kode ini ke kasir. Simpan atau foto kodenya, pesananmu juga akan tampil di bagian "Pesanan saya" di halaman menu.</p>
 
                     <p class="oj-code">{{ $order->order_code }}</p>
                     <p><span class="oj-status {{ $statusClass }}">{{ $statusText }}</span></p>
@@ -37,7 +37,7 @@
                 <div class="oj-panel">
                     <dl class="oj-meta">
                         <div><dt>Nama</dt><dd>{{ $order->customer_name }}</dd></div>
-                        <div><dt>Meja</dt><dd>{{ $order->table_number }}</dd></div>
+                        <div><dt>Meja</dt><dd>{{ $order->table_number ?? 'Bawa pulang' }}</dd></div>
                         <div><dt>Pembayaran</dt><dd>{{ $paymentText }}</dd></div>
                     </dl>
 

@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\DiningTable;
+use App\Models\Order;
+use App\Support\OrderFlow;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class MenuController extends Controller
@@ -15,16 +18,8 @@ class MenuController extends Controller
      */
     public function index(): View
     {
-        // Meja di session bisa sudah dihapus atau dinonaktifkan admin: kalau begitu, lupakan.
-        if (session()->has('table_id')) {
-            $stillValid = DiningTable::where('id', session('table_id'))
-                ->where('is_active', true)
-                ->exists();
-
-            if (! $stillValid) {
-                session()->forget(['table_id', 'table_number']);
-            }
-        }
+        // Membersihkan meja di session yang sudah kedaluwarsa, dihapus, atau dinonaktifkan.
+        DiningTable::fromSession();
 
         $categories = Category::query()
             ->with(['items' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
@@ -33,12 +28,14 @@ class MenuController extends Controller
             ->filter(fn (Category $category) => $category->items->isNotEmpty())
             ->values();
 
-        return view('customer.menu', compact('categories'));
+        $myOrders = $this->myActiveOrders();
+
+        return view('customer.menu', compact('categories', 'myOrders'));
     }
 
     /**
      * Tujuan QR code di meja, contoh: https://domain-kamu.com/meja/k3x9...
-     * Token acak dicocokkan ke tabel meja, meja disimpan di session,
+     * Token acak dicocokkan ke tabel meja, meja diingat di session HP pelanggan,
      * lalu pelanggan diarahkan ke menu. Token tidak dikenal / meja nonaktif = 404.
      */
     public function table(string $token): RedirectResponse
@@ -47,11 +44,32 @@ class MenuController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        session([
-            'table_id' => $table->id,
-            'table_number' => $table->number,
-        ]);
+        DiningTable::rememberInSession($table);
 
         return redirect()->route('menu');
+    }
+
+    /**
+     * Pesanan milik HP ini yang belum selesai ("Pesanan saya").
+     * Kode pesanan disimpan di session saat checkout; yang sudah selesai
+     * atau dibatalkan dibuang dari daftar.
+     */
+    private function myActiveOrders(): Collection
+    {
+        $codes = (array) session('order_codes', []);
+
+        if ($codes === []) {
+            return collect();
+        }
+
+        $orders = Order::query()
+            ->whereIn('order_code', $codes)
+            ->whereIn('status', OrderFlow::ACTIVE)
+            ->orderBy('created_at')
+            ->get();
+
+        session(['order_codes' => $orders->pluck('order_code')->all()]);
+
+        return $orders;
     }
 }

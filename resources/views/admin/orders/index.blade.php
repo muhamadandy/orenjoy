@@ -14,6 +14,14 @@
 
 @section('content')
     <section class="section">
+        @if (in_array($role, ['admin', 'cashier'], true))
+            <div class="mb-3">
+                <a href="{{ route('admin.orders.create') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Pesanan baru
+                </a>
+            </div>
+        @endif
+
         <ul class="nav nav-pills mb-3 flex-wrap gap-1">
             <li class="nav-item">
                 <a class="nav-link {{ $filter === 'aktif' ? 'active' : '' }}"
@@ -54,7 +62,7 @@
                                     <div>
                                         <strong>{{ $order->order_code }}</strong>
                                         <div class="text-muted small">
-                                            Meja {{ $order->table_number }}
+                                            {{ $order->table_number ? 'Meja '.$order->table_number : 'Bawa pulang' }}
                                             @if ($order->customer_name) &middot; {{ $order->customer_name }} @endif
                                         </div>
                                         <div class="text-muted small">
