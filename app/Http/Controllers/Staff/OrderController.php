@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\DiningTable;
 use App\Models\Order;
 use App\Services\OrderService;
+use App\Services\PaymentService;
 use App\Support\OrderFlow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -148,7 +149,7 @@ class OrderController extends Controller
             ->with('success', "Pesanan {$order->order_code} dibuat ({$this->statusText($order->status)}).");
     }
 
-    public function updateStatus(Request $request, Order $order): RedirectResponse
+    public function updateStatus(Request $request, Order $order, PaymentService $payments): RedirectResponse
     {
         $role = $request->user()->role?->role_name;
         $target = (string) $request->input('status');
@@ -168,6 +169,12 @@ class OrderController extends Controller
 
         if (! $updated) {
             return back()->with('error', 'Status pesanan tidak bisa diubah. Mungkin sudah diubah staf lain, atau Anda tidak berhak. Daftar sudah diperbarui.');
+        }
+
+        // Pesanan dibatalkan, atau dibayar manual di kasir: matikan QR QRIS yang masih menunggu
+        // supaya tidak bisa dibayar lagi oleh pelanggan. Dilakukan di luar transaksi karena memanggil Midtrans.
+        if (in_array($target, ['cancelled', 'settlement'], true)) {
+            $payments->cancelPending($updated);
         }
 
         return back()->with('success', "Pesanan {$updated->order_code}: ".OrderFlow::label($updated->status).'.');

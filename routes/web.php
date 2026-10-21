@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\MenuController;
 use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Customer\PaymentController;
+use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Controllers\Staff\OrderController as StaffOrderController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +24,15 @@ Route::get('/meja/{token}', [MenuController::class, 'table'])->where('token', '[
 // Batas 30 permintaan per menit per IP (WiFi restoran biasanya satu IP untuk semua pelanggan).
 Route::post('/checkout', [OrderController::class, 'store'])->middleware('throttle:30,1')->name('checkout');
 Route::get('/pesanan/{code}', [OrderController::class, 'show'])->name('order.show');
+
+// Pembayaran QRIS (publik: pelanggan tidak login, kode pesanan acak berfungsi sebagai kunci)
+Route::post('/pesanan/{code}/qris', [PaymentController::class, 'qris'])
+    ->middleware('throttle:6,1')->name('order.payment.qris');
+Route::get('/pesanan/{code}/status', [PaymentController::class, 'status'])
+    ->middleware('throttle:60,1')->name('order.payment.status');
+
+// Notifikasi dari Midtrans (publik, bebas CSRF; keamanannya lewat tanda tangan di controller)
+Route::post('/midtrans/notification', MidtransWebhookController::class)->name('midtrans.notification');
 
 // Login staf
 Route::get('/admin/login', [LoginController::class, 'create'])->name('login');

@@ -16,6 +16,11 @@
         $paymentText = ['tunai' => 'Tunai', 'qris' => 'QRIS'][$order->payment_method] ?? $order->payment_method;
         $rupiah = fn ($n) => 'Rp '.number_format($n, 0, ',', '.');
         $isActive = in_array($order->status, ['pending', 'settlement', 'cooked'], true);
+
+        // Saat QR QRIS tampil, halaman memeriksa status sendiri (lihat customer/_qris), jadi tidak perlu muat ulang.
+        $qrisPolling = $order->payment_method === 'qris'
+            && $order->status === 'pending'
+            && app(\App\Services\PaymentService::class)->enabled();
     @endphp
 
     <div class="container py-4">
@@ -29,10 +34,12 @@
                     <p class="oj-code">{{ $order->order_code }}</p>
                     <p><span class="oj-status {{ $statusClass }}">{{ $statusText }}</span></p>
 
-                    @if ($order->status === 'pending')
+                    @if ($order->status === 'pending' && $order->payment_method === 'tunai')
                         <p class="oj-muted">Pembayaran {{ $paymentText }} dilakukan di kasir. Pesananmu mulai diproses setelah pembayaran diterima.</p>
                     @endif
                 </div>
+
+                @include('customer._qris')
 
                 <div class="oj-panel">
                     <dl class="oj-meta">
@@ -68,7 +75,7 @@
                 <div class="text-center mt-4">
                     <a href="{{ route('menu') }}" class="btn btn-primary oj-submit">Pesan lagi</a>
                     @if ($isActive)
-                        <p class="oj-muted mt-3 mb-0"><small>Status diperbarui otomatis setiap 30 detik.</small></p>
+                        <p class="oj-muted mt-3 mb-0"><small>Status diperbarui otomatis.</small></p>
                     @endif
                 </div>
             </div>
@@ -77,9 +84,9 @@
 @endsection
 
 @push('scripts')
-    <script>
-        @if (in_array($order->status, ['pending', 'settlement', 'cooked'], true))
-        setTimeout(function () { window.location.reload(); }, 30000);
-        @endif
-    </script>
+    @if ($isActive && ! $qrisPolling)
+        <script>
+            setTimeout(function () { window.location.reload(); }, 30000);
+        </script>
+    @endif
 @endpush

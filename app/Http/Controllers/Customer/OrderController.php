@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DiningTable;
 use App\Models\Order;
 use App\Services\OrderService;
+use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -20,7 +21,7 @@ class OrderController extends Controller
      * Browser hanya mengirim id menu dan jumlahnya. Nama dan harga selalu
      * diambil ulang dari database, jadi harga tidak bisa dimanipulasi dari HP.
      */
-    public function store(Request $request, OrderService $orders): JsonResponse
+    public function store(Request $request, OrderService $orders, PaymentService $payments): JsonResponse
     {
         $data = $request->validate([
             'customer_name' => ['required', 'string', 'max:60'],
@@ -65,7 +66,6 @@ class OrderController extends Controller
             'user_id' => null,
         ]);
 
-
         // Ingat kode pesanan di session HP ini supaya muncul di "Pesanan saya" (maksimal 10 terakhir).
         session([
             'order_codes' => collect(session('order_codes', []))
@@ -75,6 +75,16 @@ class OrderController extends Controller
                 ->values()
                 ->all(),
         ]);
+
+        // QRIS: langsung buat QR di Midtrans. Kalau gagal, tidak apa-apa: pesanan tetap tersimpan
+        // dan halaman pesanan menawarkan tombol "Buat QR baru" (atau bayar di kasir).
+        if ($order->payment_method === 'qris' && $payments->enabled()) {
+            try {
+                $payments->createQris($order);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         // Path relatif supaya tetap benar walau diakses lewat IP LAN atau domain lain.
         return response()->json([
