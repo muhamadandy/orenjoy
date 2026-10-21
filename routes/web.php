@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DiningTableController;
 use App\Http\Controllers\Admin\ItemController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\MenuController;
 use App\Http\Controllers\Customer\OrderController;
@@ -60,4 +62,9 @@ Route::prefix('admin')
         Route::patch('tables/{table}/toggle', [DiningTableController::class, 'toggle'])->name('tables.toggle');
         Route::post('tables/{table}/regenerate', [DiningTableController::class, 'regenerate'])->name('tables.regenerate');
         Route::resource('tables', DiningTableController::class)->only(['index', 'store', 'destroy']);
+
+        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+        Route::resource('users', UserController::class)->except('show');
     });

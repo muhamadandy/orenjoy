@@ -19,9 +19,14 @@ class IdMessages
             'image' => ':attribute harus berupa gambar.',
             'mimes' => 'Format :attribute harus :values.',
             'uploaded' => 'Unggah :attribute gagal. Ukuran file mungkin melebihi batas server.',
+            'email' => ':attribute harus berupa alamat email yang valid.',
+            'confirmed' => 'Konfirmasi :attribute tidak cocok.',
+            'regex' => 'Format :attribute tidak valid.',
+            'alpha_dash' => ':attribute hanya boleh berisi huruf, angka, strip (-), dan garis bawah (_).',
             'max.string' => ':attribute maksimal :max karakter.',
             'max.numeric' => ':attribute maksimal :max.',
             'max.file' => 'Ukuran :attribute maksimal :max KB.',
+            'min.string' => ':attribute minimal :min karakter.',
             'min.numeric' => ':attribute minimal :min.',
         ];
     }

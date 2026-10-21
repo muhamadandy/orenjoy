@@ -28,6 +28,7 @@
             ['route' => 'admin.items.index',      'match' => 'admin.items.*',      'icon' => 'bi-card-list',   'label' => 'Daftar Menu',        'roles' => ['admin']],
             ['route' => 'admin.tables.index',     'match' => 'admin.tables.*',     'icon' => 'bi-qr-code',     'label' => 'Meja & QR',          'roles' => ['admin']],
             ['route' => 'admin.orders.index',     'match' => 'admin.orders.*',     'icon' => 'bi-cart-fill',   'label' => $role === 'chef' ? 'Antrean Dapur' : 'Kelola Pesanan', 'roles' => ['admin', 'cashier', 'chef']],
+                        ['route' => 'admin.reports.index',    'match' => 'admin.reports.*',    'icon' => 'bi-graph-up',    'label' => 'Laporan Penjualan', 'roles' => ['admin']],
             ['route' => 'admin.users.index',      'match' => 'admin.users.*',      'icon' => 'bi-person-fill', 'label' => 'Manajemen Karyawan', 'roles' => ['admin']],
         ];
     @endphp
