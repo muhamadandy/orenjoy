@@ -62,7 +62,9 @@ class MidtransService
     {
         $response = $this->http($this->apiBase())->get('/v2/'.rawurlencode($reference).'/status');
 
-        return $this->checked($response->json() ?? [], ['200'], 'Gagal membaca status pembayaran');
+        // Midtrans memakai kode berbeda untuk tiap status: 200 sukses, 201 menunggu bayar,
+        // 202 ditolak, 407 kedaluwarsa. Semuanya balasan sah yang berisi transaction_status.
+        return $this->checked($response->json() ?? [], ['200', '201', '202', '407'], 'Gagal membaca status pembayaran');
     }
 
     public function cancel(string $reference): array
