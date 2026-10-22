@@ -31,4 +31,6 @@ return [
     */
     'table_occupied_minutes' => (int) env('ORENJOY_TABLE_OCCUPIED_MINUTES', 90),
 
+    // Mode situs demo: mengaktifkan pesanan contoh dan perintah demo:reset.
+    'demo' => (bool) env('ORENJOY_DEMO', false),
 ];

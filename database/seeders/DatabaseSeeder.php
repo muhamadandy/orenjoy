@@ -15,5 +15,10 @@ class DatabaseSeeder extends Seeder
             ItemSeeder::class,
             DiningTableSeeder::class,
         ]);
+
+        // Pesanan contoh hanya untuk situs demo (ORENJOY_DEMO=true di .env).
+        if (config('orenjoy.demo')) {
+            $this->call(DemoOrderSeeder::class);
+        }
     }
 }
