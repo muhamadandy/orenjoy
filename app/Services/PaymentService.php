@@ -107,20 +107,27 @@ class PaymentService
         DB::transaction(function () use ($payment, $body, $mapped) {
             $locked = Payment::lockForUpdate()->find($payment->id);
 
-            if (! $locked || $locked->status !== 'pending') {
+            if (! $locked) {
                 return;
             }
 
-            if ($mapped === 'settlement' && isset($body['gross_amount'])) {
-                if ((int) round((float) $body['gross_amount']) !== (int) $locked->amount) {
-                    Log::warning('Jumlah pembayaran Midtrans tidak cocok', [
-                        'reference' => $locked->reference,
-                        'expected' => $locked->amount,
-                        'received' => $body['gross_amount'],
-                    ]);
+            if ($mapped === 'settlement' && isset($body['gross_amount'])
+                && (int) round((float) $body['gross_amount']) !== (int) $locked->amount) {
+                Log::warning('Jumlah pembayaran Midtrans tidak cocok', [
+                    'reference' => $locked->reference,
+                    'expected' => $locked->amount,
+                    'received' => $body['gross_amount'],
+                ]);
 
-                    return;
-                }
+                return;
+            }
+
+            // Uang masuk untuk pembayaran yang sudah kita tandai batal/kedaluwarsa: jangan diabaikan.
+            // Catat sebagai dibayar supaya terlihat, lalu beri peringatan di log.
+            $late = $mapped === 'settlement' && in_array($locked->status, ['cancel', 'expire'], true);
+
+            if ($locked->status !== 'pending' && ! $late) {
+                return;
             }
 
             $locked->update([
@@ -139,29 +146,53 @@ class PaymentService
             if ($order && $order->status === 'pending') {
                 $order->update(['status' => 'settlement']);
             } elseif ($order) {
-                Log::warning('QRIS dibayar untuk pesanan yang statusnya bukan pending', [
+                Log::warning('PERLU TINDAKAN: QRIS dibayar untuk pesanan yang statusnya bukan pending. Periksa dan refund lewat dashboard Midtrans bila perlu.', [
                     'order' => $order->order_code,
-                    'status' => $order->status,
+                    'order_status' => $order->status,
+                    'payment' => $locked->reference,
+                    'amount' => $locked->amount,
                 ]);
             }
         });
     }
 
-    /** Batalkan pembayaran yang masih menunggu (saat staf membatalkan / menerima bayar manual). */
+    /** Hentikan pembayaran yang masih menunggu (saat staf membatalkan / menerima bayar manual). */
     public function cancelPending(Order $order): void
     {
         foreach ($order->payments()->where('status', 'pending')->get() as $payment) {
-            try {
-                $this->midtrans->cancel($payment->reference);
-            } catch (\Throwable $e) {
-                // 404 = pelanggan belum pernah memilih metode, tidak ada transaksi yang perlu dibatalkan.
-                if (! str_contains($e->getMessage(), '(kode 404)')) {
-                    report($e);
-                }
+            $this->closeAtMidtrans($payment);
+
+            // Tandai di sisi kita apa pun hasilnya, supaya pembayaran ini tidak ditawarkan lagi.
+            // Kalau Midtrans ternyata tetap menerima uang, apply() akan mencatatnya sebagai pembayaran terlambat.
+            $payment->update(['status' => 'cancel']);
+        }
+    }
+
+    /** Coba batalkan di Midtrans; kalau ditolak, coba akhiri (expire). 404 = transaksi belum pernah dibuat. */
+    private function closeAtMidtrans(Payment $payment): void
+    {
+        try {
+            $this->midtrans->cancel($payment->reference);
+
+            return;
+        } catch (\Throwable $e) {
+            if (str_contains($e->getMessage(), '(kode 404)')) {
+                return;
             }
 
-            // Tandai batal di sisi kita apa pun hasilnya, supaya pembayaran lama ini tidak dianggap berlaku lagi.
-            $payment->update(['status' => 'cancel']);
+            Log::warning('Pembatalan ke Midtrans ditolak, mencoba expire', [
+                'reference' => $payment->reference,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        try {
+            $this->midtrans->expire($payment->reference);
+        } catch (\Throwable $e) {
+            Log::error('PERLU TINDAKAN: transaksi tidak bisa dibatalkan di Midtrans dan masih bisa dibayar', [
+                'reference' => $payment->reference,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

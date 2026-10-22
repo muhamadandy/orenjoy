@@ -74,6 +74,15 @@ class MidtransService
         return $this->checked($response->json() ?? [], ['200'], 'Gagal membatalkan transaksi');
     }
 
+    /** Paksa transaksi yang masih pending menjadi kedaluwarsa (cadangan kalau pembatalan ditolak). */
+    public function expire(string $reference): array
+    {
+        $response = $this->http($this->apiBase())->post('/v2/'.rawurlencode($reference).'/expire');
+
+        // 200 atau 407 ("transaction is expired") sama-sama berarti transaksi sudah diakhiri.
+        return $this->checked($response->json() ?? [], ['200', '407'], 'Gagal mengakhiri transaksi');
+    }
+
     /** SHA512(order_id + status_code + gross_amount + server key) */
     public function validSignature(array $payload): bool
     {

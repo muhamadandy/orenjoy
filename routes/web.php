@@ -25,11 +25,13 @@ Route::get('/meja/{token}', [MenuController::class, 'table'])->where('token', '[
 Route::post('/checkout', [OrderController::class, 'store'])->middleware('throttle:30,1')->name('checkout');
 Route::get('/pesanan/{code}', [OrderController::class, 'show'])->name('order.show');
 
-// Pembayaran QRIS (publik: pelanggan tidak login, kode pesanan acak berfungsi sebagai kunci)
+// Pembayaran QRIS (publik: pelanggan tidak login, kode pesanan acak berfungsi sebagai kunci).
+// Batasnya longgar karena banyak pelanggan memakai WiFi restoran yang sama (satu IP). Halaman pesanan
+// memeriksa status tiap 5 detik, dan pemeriksaan ke Midtrans sendiri sudah dibatasi di PaymentService::sync.
 Route::post('/pesanan/{code}/qris', [PaymentController::class, 'qris'])
-    ->middleware('throttle:6,1')->name('order.payment.qris');
+    ->middleware('throttle:30,1')->name('order.payment.qris');
 Route::get('/pesanan/{code}/status', [PaymentController::class, 'status'])
-    ->middleware('throttle:60,1')->name('order.payment.status');
+    ->middleware('throttle:600,1')->name('order.payment.status');
 
 // Notifikasi dari Midtrans (publik, bebas CSRF; keamanannya lewat tanda tangan di controller)
 Route::post('/midtrans/notification', MidtransWebhookController::class)->name('midtrans.notification');
