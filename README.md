@@ -9,7 +9,7 @@ Customers scan a QR code on their table, order from their phone, and pay online 
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white)
 ![Midtrans](https://img.shields.io/badge/Payments-Midtrans%20Snap-002855)
 
-**Live demo:** coming soon · runs in **Midtrans sandbox mode** (no real money)
+**Live demo:** https://orenjoy.web.id** (no real money)
 
 <p align="center">
   <img src="docs/screenshots/menu.png" width="300" alt="Orenjoy customer menu on mobile">
